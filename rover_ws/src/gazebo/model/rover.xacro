@@ -498,7 +498,7 @@
     <joint name="stereo" type="fixed">
         <parent link="base_link"/>
         <child link="stereo_link"/>
-        <origin xyz="0.3 0 0.1" rpy="-1.57 -1.57 -1.57"/>
+        <origin xyz="0.2 0.2 0.275" rpy="0 0 0"/>
     </joint>
 
     <link name="stereo_link">
