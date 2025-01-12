@@ -1,5 +1,8 @@
 <?xml version = "1.0"?>
-<robot>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:property name = "base_link_y" value = "1"/>
+<xacro:property name = "wheel_link_radius" value = "0.15"/>
+<xacro:property name = "wheel_link_length" value = "0.05"/>
 
 <gazebo reference = "base_link">
 <mu1>0.2</mu1>
@@ -105,53 +108,40 @@
 <material>Gazebo/Green</material>
 </gazebo>
 
+
 <gazebo>
-<plugin name = 'skid_steer_drive' filename = 'libgazebo_ros_diff_drive.so'>
-<ros>
-<namespace></namespace>
-</ros>
-<num_wheel_pairs>2</num_wheel_pairs>
+        <plugin name='diff_drive' filename='libgazebo_ros_diff_drive.so'>
+            <num_wheel_pairs>2</num_wheel_pairs>
 
+            <!-- wheels -->
+            <left_joint>left_front_wheel_joint</left_joint>
+            
+            <right_joint>right_front_wheel_joint</right_joint>
+           
+           <left_joint>left_back_wheel_joint</left_joint>
+            
+            <right_joint>right_back_wheel_joint</right_joint>
 
+            <!-- kinematics -->
+            <wheel_separation>0.45</wheel_separation>
+            <wheel_diameter>0.2</wheel_diameter>
 
-<left_joint>left_front_wheel_joint</left_joint>
-<right_joint>right_back_wheel_joint</right_joint>
-<!--wheel_seperation value = "1.05"/!-->
-<wheel_seperation>1.05</wheel_seperation>
+            <wheel_separation>0.45</wheel_separation>
+            <wheel_diameter>0.2</wheel_diameter>
 
-<left_joint>left_back_wheel_joint</left_joint>
-<right_joint>right_front_wheel_joint</right_joint>
-<wheel_seperation>1.05</wheel_seperation>
-<!--wheel_seperation value = "1.05"/!-->
+            <!-- limits -->
+            <max_wheel_torque>10</max_wheel_torque>
+            <max_wheel_acceleration>1.0</max_wheel_acceleration>
 
-<updateRate>$10</updateRate>
+            <!-- output -->
+            <publish_odom>true</publish_odom>
+            <publish_odom_tf>true</publish_odom_tf>
+            <publish_wheel_tf>true</publish_wheel_tf>
 
-<wheel_diameter>0.15</wheel_diameter>
-<wheel_diameter>0.15</wheel_diameter>
-
-<max_wheel_torque>1000</max_wheel_torque>
-<max_wheel_acceleration>5.0</max_wheel_acceleration>
-
-<commandTopic>cmd_vel</commandTopic>
-<odometryTopic>odom</odometryTopic>
-
-<odometryFrame>odom</odometryFrame>
-
- <robotBaseFrame>base_link</robotBaseFrame>
-
-  <odometrySource>1</odometrySource>
-  <publishOdom>true</publishOdom>
-  <publishWheelJointState>true</publishWheelJointState>
-<publish_odom>true</publish_odom>
-<publish_odom_tf>true</publish_odom_tf>
-<publish_wheel_tf>true</publish_wheel_tf>
-<odom_publish_frequency>1</odom_publish_frequency>
-
-<odometry_frame>odom</odometry_frame>
-<robot_base_frame>left_front_link</robot_base_frame>
-
-</plugin>
-</gazebo>
+            <odometry_frame>odom</odometry_frame>
+            <robot_base_frame>base_link</robot_base_frame>
+        </plugin>
+    </gazebo>
 
 
 <!-- hokuyo -->

@@ -1,8 +1,34 @@
 <?xml version = "1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name= "rover">
 
+<xacro:property name = "base_link_x" value = "0.5"/>
+<xacro:property name = "base_link_y" value = "1"/>
+<xacro:property name = "base_link_z" value = "0.25"/>
+
+<xacro:property name = "wheel_link_radius" value = "0.15"/>
+<xacro:property name = "wheel_link_length" value = "0.05"/>
+<xacro:property name = "wheel_link_z" value = "-0.05"/>
+
+<xacro:property name = "density" value = "2710.0"/>
+<xacro:property name = "pi_constant" value = "3.14159"/>
+
+<xacro:property name = "base_mass" value = "${density*base_link_x*base_link_y*base_link_z}"/>
+<xacro:property name = "wheel_mass" value = "${density*pi_constant*wheel_link_radius*wheel_link_radius*wheel_link_length}"/>
+
+<xacro:property name = "Iz_wheel" value = "${0.5*wheel_mass*wheel_link_radius*wheel_link_radius}"/>
+<xacro:property name = "I_wheel" value = "${(1/12)*wheel_mass*(3*wheel_link_radius*wheel_link_radius+wheel_link_length*wheel_link_length)}"/>
+
+
+<xacro:macro name = "inertial_wheel">
+<inertial>
+<origin rpy = "0 0 0" xyz = "0 0 0"/>
+<mass value = "${wheel_mass}"/>
+<inertia ixx = "${I_wheel}" ixy = "0" ixz = "0" iyy = "${I_wheel}" iyz = "0" izz = "${Iz_wheel}" />
+</inertial>
+</xacro:macro>
 
 <xacro:include filename="$(find gazebo)/model/rover.gazebo"/>
+
 
 <material name = "black">
     <color rgba = " 0 0 0 1"/>
@@ -43,7 +69,7 @@
     <link name = "base_link">
         <visual>
             <geometry>
-                <box size = " 0.5 1 0.25"/>
+                <box size = "${base_link_x} ${base_link_y} ${base_link_z}"/>
                 
             </geometry>
             <origin xyz = " 0 0 0.125" rpy = "0 0 0"/>
@@ -52,7 +78,7 @@
    
     <collision>
             <geometry>
-                <box size = " 0.5 1 0.25"/>
+                <box size = "${base_link_x} ${base_link_y} ${base_link_z}"/>
                 
             </geometry>
             <origin xyz = " 0 0 0.125" rpy = "0 0 0"/>
@@ -60,8 +86,12 @@
 
     <inertial>
         <origin xyz = " 0 0 0.125" rpy = "0 0 0"/>
-        <mass value= "2"/>
-        <inertia ixx = "100" ixy = "0" ixz = "0" iyy = "100" izz = "100" iyz = "0"/>
+        <mass value= "${base_mass}"/>
+        <inertia ixx = "${(1/12)*base_mass*(base_link_y*base_link_y+base_link_z*base_link_z)}" 
+        ixy = "0" ixz = "0" 
+        iyy = "${(1/12)*base_mass*(base_link_x*base_link_x+base_link_z*base_link_z)}" 
+        izz = "${(1/12)*base_mass*(base_link_y*base_link_y+base_link_x*base_link_x)}" 
+        iyz = "0"/>
     </inertial>
    
    
@@ -71,41 +101,32 @@
 <joint name = "left_front_wheel_joint" type = "continuous">
     <parent link = "base_link"/>
     <child link = "left_front_link"/>
-    <origin xyz = "0.275 0.45 0" rpy = "0 0 0" />
+    <origin xyz = "0.275 ${-base_link_y/2-wheel_link_length/2} ${wheel_link_z}" rpy = "0 0 0" />
     <axis xyz ="1 0 0"/>
-    <limit effort = "10" velocity = "5"/>
+    <limit effort = "1000" velocity = "1000"/>
     <dynamics damping = "1.0" friction = "1.0"/>
-
-
 </joint>
-
-
 
 
     <link name = "left_front_link">
         <visual>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
             <material name = "white"/>
         </visual>
    
     <collision>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                 <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
     </collision>
 
-    <inertial>
-         <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
-        <mass value= "0.5"/>
-        <inertia ixx = "100" ixy = "0" ixz = "0" iyy = "100" izz = "100" iyz = "0"/>
-    </inertial>
-   
+<xacro:inertial_wheel/>   
 
     </link>
 
@@ -118,9 +139,9 @@
 <joint name = "right_front_wheel_joint" type = "continuous">
     <parent link = "base_link"/>
     <child link = "right_front_link"/>
-    <origin xyz = "-0.275 0.45 0" rpy = "0 0 0" />
+    <origin xyz = "-0.275 ${-base_link_y/2-wheel_link_length/2} ${wheel_link_z}" rpy = "0 0 0" />
     <axis xyz ="1 0 0"/>
-    <limit effort = "10" velocity = "5"/>
+    <limit effort = "1000" velocity = "1000"/>
     <dynamics damping = "1.0" friction = "1.0"/>
 
 
@@ -132,26 +153,22 @@
     <link name = "right_front_link">
         <visual>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
             <material name = "white"/>
         </visual>
    
     <collision>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                 <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
     </collision>
 
-    <inertial>
-         <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
-        <mass value= "0.5"/>
-        <inertia ixx = "100" ixy = "0" ixz = "0" iyy = "100" izz = "100" iyz = "0"/>
-    </inertial>
+  <xacro:inertial_wheel/>   
    
    
     </link>
@@ -160,9 +177,9 @@
 <joint name = "left_back_wheel_joint" type = "continuous">
     <parent link = "base_link"/>
     <child link = "left_back_link"/>
-    <origin xyz = "0.275 -0.45 0" rpy = "0 0 0" />
+    <origin xyz = "0.275 ${base_link_y/2+wheel_link_length/2} ${wheel_link_z}" rpy = "0 0 0" />
     <axis xyz ="1 0 0"/>
-    <limit effort = "10" velocity = "5"/>
+    <limit effort = "1000" velocity = "1000"/>
     <dynamics damping = "1.0" friction = "1.0"/>
 
 
@@ -174,26 +191,22 @@
     <link name = "left_back_link">
         <visual>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+               <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
             <material name = "white"/>
         </visual>
     
      <collision>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
     </collision>
 
-    <inertial>
-         <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
-        <mass value= "0.5"/>
-        <inertia ixx = "100" ixy = "0" ixz = "0" iyy = "100" izz = "100" iyz = "0"/>
-    </inertial>
+    <xacro:inertial_wheel/>   
     
     </link>
 
@@ -201,9 +214,9 @@
 <joint name = "right_back_wheel_joint" type = "continuous">
     <parent link = "base_link"/>
     <child link = "right_back_link"/>
-    <origin xyz = "-0.275 -0.45 0" rpy = "0 0 0" />
+    <origin xyz = "-0.275 ${base_link_y/2+wheel_link_length/2} ${wheel_link_z}" rpy = "0 0 0" />
     <axis xyz ="1 0 0"/>
-    <limit effort = "10" velocity = "5"/>
+    <limit effort = "1000" velocity = "1000"/>
     <dynamics damping = "1.0" friction = "1.0"/>
 
 
@@ -215,26 +228,22 @@
     <link name = "right_back_link">
         <visual>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                 <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
             <material name = "white"/>
         </visual>
     
      <collision>
             <geometry>
-                <cylinder radius = "0.15" length = "0.05"/>
+                <cylinder radius = "${wheel_link_radius}" length = "${wheel_link_length}"/>
             
             </geometry>
-            <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
+            <origin xyz = " 0 0 0" rpy = "0 1.570795 0"/>
     </collision>
 
-    <inertial>
-         <origin xyz = " 0 0 0" rpy = "0 1.57 0"/>
-        <mass value= "0.5"/>
-        <inertia ixx = "100" ixy = "0" ixz = "0" iyy = "100" izz = "100" iyz = "0"/>
-    </inertial>
+       <xacro:inertial_wheel/>   
     
     
     </link>
@@ -334,6 +343,61 @@
 
 
 
+<gazebo>
+<plugin name = 'skid_steer_drive' filename = 'libgazebo_ros_diff_drive.so'>
+<ros>
+<namespace></namespace>
+</ros>
+<num_wheel_pairs>2</num_wheel_pairs>
+
+
+
+<left_joint>left_front_wheel_joint</left_joint>
+<right_joint>right_back_wheel_joint</right_joint>
+<!--wheel_seperation value = "1.05"/!-->
+<wheel_seperation>1.05</wheel_seperation>
+
+<left_joint>left_back_wheel_joint</left_joint>
+<right_joint>right_front_wheel_joint</right_joint>
+<wheel_seperation>1.05</wheel_seperation>
+<!--wheel_seperation value = "1.05"/!-->
+
+<updateRate>$10</updateRate>
+
+<wheel_diameter>0.15</wheel_diameter>
+<wheel_diameter>0.15</wheel_diameter>
+
+<max_wheel_torque>1000</max_wheel_torque>
+<max_wheel_acceleration>5.0</max_wheel_acceleration>
+
+<commandTopic>cmd_vel</commandTopic>
+<odometryTopic>odom</odometryTopic>
+
+<odometryFrame>odom</odometryFrame>
+
+ <robotBaseFrame>base_link</robotBaseFrame>
+
+  <odometrySource>1</odometrySource>
+  <publishOdom>true</publishOdom>
+  <publishWheelJointState>true</publishWheelJointState>
+<publish_odom>true</publish_odom>
+<publish_odom_tf>true</publish_odom_tf>
+<publish_wheel_tf>true</publish_wheel_tf>
+<odom_publish_frequency>1</odom_publish_frequency>
+
+<odometry_frame>odom</odometry_frame>
+<robot_base_frame>left_front_link</robot_base_frame>
+
+</plugin>
+</gazebo>
+
+
+
+
+
+
+
+
 
 <joint name = "imu_joint" type = "fixed">
     <parent link = "base_link"/>
@@ -359,7 +423,7 @@
         <cylinder radius="0.05" length="0.04"/>
       </geometry>
     </collision>
-
+</link>
   <gazebo reference="imu_link">
     <sensor name="imu_sensor" type="imu">
       <always_on>true</always_on>
@@ -373,7 +437,7 @@
     </sensor>
     <material>Gazebo/Grey</material>
   </gazebo>
-  </link>
+  
 
 
 
